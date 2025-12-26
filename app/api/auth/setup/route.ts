@@ -8,9 +8,9 @@ export async function POST(request: Request) {
     const db = await getDatabase();
     const usersCollection = db.collection<User>('users');
 
-    // Check if any users exist
-    const existingUsers = await usersCollection.countDocuments();
-    if (existingUsers > 0) {
+    // Check if any admin users exist
+    const existingAdminUsers = await usersCollection.countDocuments({ role: 'admin' });
+    if (existingAdminUsers > 0) {
       return NextResponse.json({
         success: false,
         message: 'Admin user already exists'
