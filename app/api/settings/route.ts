@@ -4,6 +4,7 @@ import { getDatabase } from '@/lib/mongodb';
 interface SiteSettings {
   _id: string;
   featuredProjectsLimit: number;
+  logo?: string;
   customers?: {
     heading: string;
     description: string;
@@ -117,6 +118,7 @@ export async function PUT(request: NextRequest) {
 
     const updateData: any = {
       featuredProjectsLimit: data.featuredProjectsLimit || 3,
+      logo: data.logo || '',
       updatedAt: new Date(),
     };
 

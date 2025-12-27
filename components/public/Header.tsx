@@ -2,11 +2,29 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Menu, X } from 'lucide-react';
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [logoError, setLogoError] = useState(false);
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Fetch logo from settings
+    fetch('/api/settings')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.settings?.logo) {
+          setLogoUrl(data.settings.logo);
+        }
+      })
+      .catch(() => {
+        // If settings fetch fails, try static file
+        setLogoUrl('/logo.png');
+      });
+  }, []);
 
   // Prevent body scroll when menu is open
   useEffect(() => {
@@ -35,9 +53,21 @@ export default function Header() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center">
-            <span className="text-2xl font-bold text-blue-900">
-              Lindsay Precast
-            </span>
+            {logoError || !logoUrl ? (
+              <span className="text-2xl font-bold text-blue-900">
+                Lindsay Precast
+              </span>
+            ) : (
+              <Image
+                src={logoUrl}
+                alt="Lindsay Precast"
+                width={180}
+                height={60}
+                className="h-12 w-auto object-contain"
+                priority
+                onError={() => setLogoError(true)}
+              />
+            )}
           </Link>
 
           {/* Desktop Navigation */}

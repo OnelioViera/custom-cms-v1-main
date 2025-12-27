@@ -1,13 +1,47 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function Footer() {
+  const [logoError, setLogoError] = useState(false);
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Fetch logo from settings
+    fetch('/api/settings')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.settings?.logo) {
+          setLogoUrl(data.settings.logo);
+        }
+      })
+      .catch(() => {
+        // If settings fetch fails, try static file
+        setLogoUrl('/logo.png');
+      });
+  }, []);
   return (
     <footer className="bg-gray-900 text-gray-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid md:grid-cols-4 gap-8">
           {/* Company Info */}
           <div>
-            <h3 className="text-white text-lg font-bold mb-4">Lindsay Precast</h3>
+            <Link href="/" className="inline-block mb-4">
+              {logoError || !logoUrl ? (
+                <h3 className="text-white text-lg font-bold">Lindsay Precast</h3>
+              ) : (
+                <Image
+                  src={logoUrl}
+                  alt="Lindsay Precast"
+                  width={180}
+                  height={60}
+                  className="h-10 w-auto object-contain"
+                  onError={() => setLogoError(true)}
+                />
+              )}
+            </Link>
             <p className="text-sm text-gray-400">
               Excellence in precast concrete solutions for renewable energy infrastructure.
             </p>

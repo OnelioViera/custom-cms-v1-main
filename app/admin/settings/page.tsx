@@ -24,6 +24,7 @@ export default function SettingsPage() {
   const [showImageEditor, setShowImageEditor] = useState(false);
   const [availablePages, setAvailablePages] = useState<Page[]>([]);
   const [settings, setSettings] = useState({
+    logo: '',
     featuredProjectsLimit: 3,
     customers: {
       heading: 'Our Customers',
@@ -72,6 +73,7 @@ export default function SettingsPage() {
       
       if (data.success) {
         const mergedSettings = {
+          logo: data.settings.logo || '',
           featuredProjectsLimit: data.settings.featuredProjectsLimit || 3,
           customers: {
             heading: data.settings.customers?.heading || 'Our Customers',
@@ -1022,6 +1024,96 @@ export default function SettingsPage() {
                 </div>
               )}
 
+            </div>
+          </div>
+
+          {/* Site Logo */}
+          <div className="bg-white p-6 rounded-lg border space-y-6">
+            <h2 className="text-xl font-semibold mb-4">Site Logo</h2>
+            
+            <div>
+              <Label>Logo</Label>
+              <div className="space-y-4 mt-2">
+                {settings.logo && (
+                  <div className="relative w-full max-w-md bg-white border rounded-lg overflow-hidden group">
+                    <div className="relative aspect-video flex items-center justify-center p-8">
+                      <Image
+                        src={settings.logo}
+                        alt="Site Logo"
+                        fill
+                        className="object-contain"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setSettings({ ...settings, logo: '' })}
+                      className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                )}
+
+                <div>
+                  <input
+                    type="file"
+                    id="logo-upload"
+                    accept="image/*"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+
+                      if (!file.type.startsWith('image/')) {
+                        toast.error('Please upload an image file');
+                        return;
+                      }
+
+                      if (file.size > 5 * 1024 * 1024) {
+                        toast.error('Image must be less than 5MB');
+                        return;
+                      }
+
+                      try {
+                        setUploading(true);
+                        const uploadFormData = new FormData();
+                        uploadFormData.append('file', file);
+
+                        const response = await fetch('/api/upload', {
+                          method: 'POST',
+                          body: uploadFormData,
+                        });
+
+                        const data = await response.json();
+
+                        if (data.success) {
+                          setSettings({ ...settings, logo: data.url });
+                          toast.success('Logo uploaded successfully');
+                        } else {
+                          toast.error(data.message || 'Upload failed');
+                        }
+                      } catch (error) {
+                        console.error('Upload error:', error);
+                        toast.error('Failed to upload logo');
+                      } finally {
+                        setUploading(false);
+                      }
+                    }}
+                    className="hidden"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => document.getElementById('logo-upload')?.click()}
+                    disabled={uploading}
+                  >
+                    <Upload className="w-4 h-4 mr-2" />
+                    {uploading ? 'Uploading...' : settings.logo ? 'Change Logo' : 'Upload Logo'}
+                  </Button>
+                  <p className="text-sm text-gray-500 mt-1">
+                    Upload site logo (Max 5MB). Recommended: PNG or SVG with transparent background
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
 
