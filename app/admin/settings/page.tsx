@@ -139,6 +139,8 @@ export default function SettingsPage() {
         imageSettings: {
           ...imageSettings,
           position: imageSettings.position as 'center' | 'top' | 'bottom',
+          overlayColor: prev.hero.imageSettings?.overlayColor || '#1e40af',
+          overlayOpacity: prev.hero.imageSettings?.overlayOpacity ?? 50,
         },
       },
     }));
@@ -921,6 +923,8 @@ export default function SettingsPage() {
                               opacity: parseInt(e.target.value),
                               position: settings.hero.imageSettings?.position || 'center',
                               scale: settings.hero.imageSettings?.scale || 100,
+                              overlayColor: settings.hero.imageSettings?.overlayColor || '#1e40af',
+                              overlayOpacity: settings.hero.imageSettings?.overlayOpacity ?? 50,
                             }
                           }
                         })}
