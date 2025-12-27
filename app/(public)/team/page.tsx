@@ -45,12 +45,12 @@ export default async function TeamPage() {
             <p className="text-gray-600 text-lg">No team members to display yet.</p>
           </div>
         ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 max-w-6xl mx-auto">
+          <div className="flex flex-wrap justify-center gap-8 max-w-6xl mx-auto">
             {members.map((member) => (
               <Link
                 key={member._id}
                 href={`/team/${member.slug}`}
-                className="group"
+                className="group w-full sm:w-80 lg:w-72 xl:w-64"
               >
                 <div className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-lg transition-shadow">
                   {/* Photo */}
