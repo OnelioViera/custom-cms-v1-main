@@ -191,7 +191,7 @@ export default function FeaturedProjectsCarousel({ projects }: FeaturedProjectsC
                 onClick={() => goToSlide(index)}
                 className={`relative aspect-video rounded-lg overflow-hidden transition-all ${
                   index === currentIndex
-                    ? 'ring-4 ring-blue-600 scale-105'
+                    ? 'ring-4 ring-gray-900 scale-105'
                     : 'opacity-60 hover:opacity-100'
                 }`}
               >
