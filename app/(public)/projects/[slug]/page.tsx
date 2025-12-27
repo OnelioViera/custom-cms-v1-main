@@ -96,7 +96,12 @@ export default async function ProjectPage({
               </Badge>
             )}
           </div>
-          <h1 className="text-5xl font-bold mb-4">{project.title}</h1>
+          <h1 
+            className="text-5xl font-bold mb-4"
+            style={{ color: project.titleColor || '#ffffff' }}
+          >
+            {project.title}
+          </h1>
           {project.client && (
             <p className="text-xl text-blue-100">Client: {project.client}</p>
           )}
@@ -107,7 +112,7 @@ export default async function ProjectPage({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {project.images && project.images[0] && (
             <div className="mb-8 rounded-lg overflow-hidden">
-              <div className="aspect-video relative">
+              <div className="aspect-video relative" style={{ backgroundColor: project.overlayColor || '#1e40af' }}>
                 <Image
                   src={project.images[0]}
                   alt={project.title}
@@ -115,6 +120,16 @@ export default async function ProjectPage({
                   className="object-cover"
                   priority
                 />
+                {/* Color Overlay */}
+                {(project.overlayColor || project.overlayOpacity !== undefined) && (
+                  <div 
+                    className="absolute inset-0"
+                    style={{
+                      backgroundColor: project.overlayColor || '#1e40af',
+                      opacity: (project.overlayOpacity ?? 50) / 100,
+                    }}
+                  />
+                )}
               </div>
             </div>
           )}
@@ -152,7 +167,10 @@ export default async function ProjectPage({
 
             <div className="mb-8">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">Overview</h2>
-              <p className="text-gray-700 text-lg leading-relaxed">
+              <p 
+                className="text-lg leading-relaxed"
+                style={{ color: project.descriptionColor || '#374151' }}
+              >
                 {project.description}
               </p>
             </div>

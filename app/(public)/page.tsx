@@ -2,8 +2,9 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { getDatabase } from '@/lib/mongodb';
-import { Project, Service } from '@/lib/models/Content';
+import { Project, Customer } from '@/lib/models/Content';
 import FeaturedProjectsCarousel from '@/components/public/FeaturedProjectsCarousel';
+import CustomersCarousel from '@/components/public/CustomersCarousel';
 
 async function getHomeData() {
   try {
@@ -13,6 +14,10 @@ async function getHomeData() {
     const settingsCollection = db.collection('settings');
     const settings = await settingsCollection.findOne({ _id: 'homepage-hero' as any });
     const limit = settings?.featuredProjectsLimit || 3;
+    const customersSettings = settings?.customers || {
+      heading: 'Our Customers',
+      description: 'Trusted by leading companies in renewable energy',
+    };
     const hero = settings?.hero || {
       title: 'Building the Future of Renewable Energy Infrastructure',
       subtitle: 'Expert precast concrete solutions for utility-scale battery storage, solar installations, and critical infrastructure projects.',
@@ -53,11 +58,11 @@ async function getHomeData() {
       .toArray();
 
     // Get active services - Remove publishStatus filter
-    const servicesCollection = db.collection<Service>('services');
-    const services = await servicesCollection
-      .find({ status: 'active' })
-      .sort({ order: 1 })
-      .limit(6)
+    // Get customers
+    const customersCollection = db.collection<Customer>('customers');
+    const customers = await customersCollection
+      .find({})
+      .sort({ order: 1, createdAt: -1 })
       .toArray();
 
     const mappedProjects = featuredProjects.map(p => ({
@@ -70,15 +75,20 @@ async function getHomeData() {
       featured: p.featured,
       images: Array.isArray(p.images) ? p.images : [],
       backgroundImage: p.backgroundImage || '',
+      overlayColor: p.overlayColor,
+      overlayOpacity: p.overlayOpacity,
+      titleColor: p.titleColor,
+      descriptionColor: p.descriptionColor,
     }));
 
     return {
       hero,
       projects: mappedProjects,
-      services: services.map(s => ({
-        ...s,
-        _id: s._id?.toString()
-      }))
+      customers: customers.map(c => ({
+        ...c,
+        _id: c._id?.toString()
+      })),
+      customersSettings,
     };
   } catch (error) {
     console.error('Error fetching home data:', error);
@@ -110,14 +120,18 @@ async function getHomeData() {
           scale: 100,
         },
       },
-      projects: [], 
-      services: [] 
+      projects: [],
+      customers: [],
+      customersSettings: {
+        heading: 'Our Customers',
+        description: 'Trusted by leading companies in renewable energy',
+      },
     };
   }
 }
 
 export default async function HomePage() {
-  const { hero, projects, services } = await getHomeData();
+  const { hero, projects, customers, customersSettings } = await getHomeData();
 
   return (
     <main>
@@ -128,40 +142,64 @@ export default async function HomePage() {
       >
         {/* Background Video */}
         {hero.backgroundType === 'video' && hero.backgroundVideo && (
-          <div className="absolute inset-0">
-            <video
-              src={hero.backgroundVideo}
-              className="w-full h-full object-cover"
-              autoPlay
-              loop
-              muted
-              playsInline
-              style={{ opacity: (hero.imageSettings?.opacity || 30) / 100 }}
-            />
-          </div>
+          <>
+            <div className="absolute inset-0">
+              <video
+                src={hero.backgroundVideo}
+                className="w-full h-full object-cover"
+                autoPlay
+                loop
+                muted
+                playsInline
+                style={{ opacity: (hero.imageSettings?.opacity || 30) / 100 }}
+              />
+            </div>
+            {/* Color Overlay */}
+            {(hero.imageSettings?.overlayColor && hero.imageSettings?.overlayOpacity) && (
+              <div 
+                className="absolute inset-0"
+                style={{
+                  backgroundColor: hero.imageSettings.overlayColor,
+                  opacity: (hero.imageSettings.overlayOpacity || 50) / 100,
+                }}
+              />
+            )}
+          </>
         )}
 
         {/* Background Image */}
         {hero.backgroundType === 'image' && hero.backgroundImage && (
-          <div 
-            className="absolute inset-0"
-            style={{ opacity: (hero.imageSettings?.opacity || 30) / 100 }}
-          >
-            <Image
-              src={hero.backgroundImage}
-              alt="Hero background"
-              fill
-              className={`object-cover ${
-                hero.imageSettings?.position === 'top' ? 'object-top' :
-                hero.imageSettings?.position === 'bottom' ? 'object-bottom' :
-                'object-center'
-              }`}
-              style={{
-                transform: `scale(${(hero.imageSettings?.scale || 100) / 100})`,
-              }}
-              priority
-            />
-          </div>
+          <>
+            <div 
+              className="absolute inset-0"
+              style={{ opacity: (hero.imageSettings?.opacity || 30) / 100 }}
+            >
+              <Image
+                src={hero.backgroundImage}
+                alt="Hero background"
+                fill
+                className={`object-cover ${
+                  hero.imageSettings?.position === 'top' ? 'object-top' :
+                  hero.imageSettings?.position === 'bottom' ? 'object-bottom' :
+                  'object-center'
+                }`}
+                style={{
+                  transform: `scale(${(hero.imageSettings?.scale || 100) / 100})`,
+                }}
+                priority
+              />
+            </div>
+            {/* Color Overlay */}
+            {(hero.imageSettings?.overlayColor && hero.imageSettings?.overlayOpacity !== undefined) && (
+              <div 
+                className="absolute inset-0"
+                style={{
+                  backgroundColor: hero.imageSettings.overlayColor,
+                  opacity: (hero.imageSettings.overlayOpacity || 50) / 100,
+                }}
+              />
+            )}
+          </>
         )}
         
         {/* Content */}
@@ -215,43 +253,22 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Services Preview */}
-      {services.length > 0 && (
+      {/* Customers Section */}
+      {customers.length > 0 && (
         <section className="py-20 bg-gray-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">Our Services</h2>
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">{customersSettings.heading}</h2>
               <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                Comprehensive precast solutions for renewable energy projects
+                {customersSettings.description}
               </p>
             </div>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
-              {services.map((service) => (
-                <div
-                  key={service._id}
-                  className="bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow"
-                >
-                  <h3 className="text-xl font-semibold mb-3">{service.title}</h3>
-                  <p className="text-gray-600 mb-4">{service.shortDescription}</p>
-                  <Link
-                    href={`/services/${service.slug}`}
-                    className="text-blue-600 font-medium hover:text-blue-700"
-                  >
-                    Learn more →
-                  </Link>
-                </div>
-              ))}
-            </div>
-
-            <div className="text-center mt-12">
-              <Link
-                href="/services"
-                className="inline-block border-2 border-gray-800 text-gray-800 px-8 py-3 rounded-lg font-semibold hover:bg-gray-800 hover:text-white transition-colors"
-              >
-                View All Services
-              </Link>
-            </div>
+            <CustomersCarousel 
+              customers={customers}
+              heading={customersSettings.heading}
+              description={customersSettings.description}
+            />
           </div>
         </section>
       )}

@@ -412,8 +412,8 @@ export default function PagesPage() {
                 </TableCell>
               </TableRow>
             ) : (
-              paginatedPages.map((page) => (
-                <TableRow key={page._id?.toString()}>
+              paginatedPages.map((page, index) => (
+                <TableRow key={page._id?.toString() || `page-${index}`}>
                   <TableCell>
                     <input
                       type="checkbox"

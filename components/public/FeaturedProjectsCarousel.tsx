@@ -13,7 +13,11 @@ interface Project {
   description: string;
   client?: string;
   images?: string[];
-  backgroundImage?: string; // New field for custom background
+  backgroundImage?: string;
+  overlayColor?: string;
+  overlayOpacity?: number;
+  titleColor?: string;
+  descriptionColor?: string;
   status: string;
 }
 
@@ -73,19 +77,26 @@ export default function FeaturedProjectsCarousel({ projects }: FeaturedProjectsC
               src={displayImage}
               alt={currentProject.title}
               fill
-              className="object-cover opacity-30"
+              className="object-cover"
               priority
               onError={(e) => {
                 console.error('Image failed to load:', displayImage);
                 console.error('Error:', e);
               }}
             />
-            <div className="absolute top-4 left-4 bg-black/50 text-white px-2 py-1 text-xs rounded">
-              Image: {displayImage.substring(0, 50)}...
-            </div>
+            {/* Color Overlay */}
+            {(currentProject.overlayColor || currentProject.overlayOpacity !== undefined) && (
+              <div 
+                className="absolute inset-0"
+                style={{
+                  backgroundColor: currentProject.overlayColor || '#1e40af',
+                  opacity: (currentProject.overlayOpacity ?? 50) / 100,
+                }}
+              />
+            )}
           </>
         ) : (
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-blue-700">
+          <div className="absolute inset-0" style={{ backgroundColor: currentProject.overlayColor || '#1e40af' }}>
             <div className="absolute top-4 left-4 bg-black/50 text-white px-2 py-1 text-xs rounded">
               No image found
             </div>
@@ -95,16 +106,25 @@ export default function FeaturedProjectsCarousel({ projects }: FeaturedProjectsC
         {/* Content Overlay */}
         <div className="relative h-full flex items-center">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-            <div className="max-w-3xl text-white">
+            <div className="max-w-3xl">
               {currentProject.client && (
-                <p className="text-blue-200 font-medium mb-2">
+                <p 
+                  className="font-medium mb-2"
+                  style={{ color: currentProject.titleColor ? 'rgba(255, 255, 255, 0.8)' : '#e0e7ff' }}
+                >
                   Client: {currentProject.client}
                 </p>
               )}
-              <h2 className="text-5xl font-bold mb-4">
+              <h2 
+                className="text-5xl font-bold mb-4"
+                style={{ color: currentProject.titleColor || '#ffffff' }}
+              >
                 {currentProject.title}
               </h2>
-              <p className="text-xl text-blue-100 mb-8 line-clamp-3">
+              <p 
+                className="text-xl mb-8 line-clamp-3"
+                style={{ color: currentProject.descriptionColor || '#e0e7ff' }}
+              >
                 {currentProject.description}
               </p>
               <Link href={`/projects/${currentProject.slug}`}>

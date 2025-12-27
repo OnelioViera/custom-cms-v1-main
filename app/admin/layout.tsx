@@ -58,6 +58,7 @@ function AdminLayoutContent({
     { name: 'Projects', href: '/admin/projects', icon: Briefcase },
     { name: 'Team Members', href: '/admin/team', icon: Users },
     { name: 'Services', href: '/admin/services', icon: Wrench },
+    { name: 'Customers', href: '/admin/customers', icon: Users },
     { name: 'Media', href: '/admin/media', icon: Image },
     { name: 'Monitoring', href: '/admin/monitoring', icon: Activity },
     { name: 'Config', href: '/admin/config', icon: Settings },

@@ -4,6 +4,10 @@ import { getDatabase } from '@/lib/mongodb';
 interface SiteSettings {
   _id: string;
   featuredProjectsLimit: number;
+  customers?: {
+    heading: string;
+    description: string;
+  };
   hero: {
     title: string;
     subtitle: string;
@@ -29,6 +33,8 @@ interface SiteSettings {
       opacity: number;
       position: 'center' | 'top' | 'bottom';
       scale: number;
+      overlayColor?: string;
+      overlayOpacity?: number;
     };
   };
   updatedAt?: Date;
@@ -46,6 +52,10 @@ export async function GET() {
       const defaultSettings: SiteSettings = {
         _id: 'homepage-hero',
         featuredProjectsLimit: 3,
+        customers: {
+          heading: 'Our Customers',
+          description: 'Trusted by leading companies in renewable energy',
+        },
         hero: {
           title: 'Building the Future of Renewable Energy Infrastructure',
           subtitle: 'Expert precast concrete solutions for utility-scale battery storage, solar installations, and critical infrastructure projects.',
@@ -71,6 +81,8 @@ export async function GET() {
             opacity: 30,
             position: 'center',
             scale: 100,
+            overlayColor: '#1e40af',
+            overlayOpacity: 50,
           },
         },
       };
@@ -108,6 +120,13 @@ export async function PUT(request: NextRequest) {
       updatedAt: new Date(),
     };
 
+    if (data.customers) {
+      updateData.customers = {
+        heading: data.customers.heading || 'Our Customers',
+        description: data.customers.description || 'Trusted by leading companies in renewable energy',
+      };
+    }
+
     if (data.hero) {
       updateData.hero = {
         title: data.hero.title || '',
@@ -134,6 +153,8 @@ export async function PUT(request: NextRequest) {
           opacity: data.hero.imageSettings?.opacity ?? 30,
           position: data.hero.imageSettings?.position || 'center',
           scale: data.hero.imageSettings?.scale ?? 100,
+          overlayColor: data.hero.imageSettings?.overlayColor || '#1e40af',
+          overlayOpacity: data.hero.imageSettings?.overlayOpacity ?? 50,
         },
       };
     }

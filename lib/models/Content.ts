@@ -25,6 +25,10 @@ export interface Project {
   content?: string;
   images?: string[];
   backgroundImage?: string;
+  overlayColor?: string;
+  overlayOpacity?: number;
+  titleColor?: string;
+  descriptionColor?: string;
   client?: string;
   startDate?: Date;
   endDate?: Date;
@@ -60,6 +64,17 @@ export interface Service {
   content?: string;
   icon?: string;
   status: 'active' | 'inactive';
+  order: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// Customer Model
+export interface Customer {
+  _id?: ObjectId;
+  name: string;
+  logo: string;
+  website?: string;
   order: number;
   createdAt: Date;
   updatedAt: Date;

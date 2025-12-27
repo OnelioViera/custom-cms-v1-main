@@ -25,6 +25,10 @@ export default function SettingsPage() {
   const [availablePages, setAvailablePages] = useState<Page[]>([]);
   const [settings, setSettings] = useState({
     featuredProjectsLimit: 3,
+    customers: {
+      heading: 'Our Customers',
+      description: 'Trusted by leading companies in renewable energy',
+    },
     hero: {
       title: '',
       subtitle: '',
@@ -50,6 +54,8 @@ export default function SettingsPage() {
         opacity: 30,
         position: 'center' as 'center' | 'top' | 'bottom',
         scale: 100,
+        overlayColor: '#1e40af',
+        overlayOpacity: 50,
       },
     },
   });
@@ -67,6 +73,10 @@ export default function SettingsPage() {
       if (data.success) {
         const mergedSettings = {
           featuredProjectsLimit: data.settings.featuredProjectsLimit || 3,
+          customers: {
+            heading: data.settings.customers?.heading || 'Our Customers',
+            description: data.settings.customers?.description || 'Trusted by leading companies in renewable energy',
+          },
           hero: {
             title: data.settings.hero?.title || '',
             subtitle: data.settings.hero?.subtitle || '',
@@ -92,6 +102,8 @@ export default function SettingsPage() {
               opacity: data.settings.hero?.imageSettings?.opacity ?? 30,
               position: data.settings.hero?.imageSettings?.position || 'center',
               scale: data.settings.hero?.imageSettings?.scale ?? 100,
+              overlayColor: data.settings.hero?.imageSettings?.overlayColor || '#1e40af',
+              overlayOpacity: data.settings.hero?.imageSettings?.overlayOpacity ?? 50,
             },
           },
         };
@@ -248,6 +260,11 @@ export default function SettingsPage() {
   
   const backgroundImageOverlayStyle: React.CSSProperties = {
     opacity: (settings.hero.imageSettings?.opacity || 30) / 100,
+  };
+  
+  const colorOverlayStyle: React.CSSProperties = {
+    backgroundColor: settings.hero.imageSettings?.overlayColor || '#1e40af',
+    opacity: (settings.hero.imageSettings?.overlayOpacity ?? 50) / 100,
   };
 
   if (loading) {
@@ -654,12 +671,21 @@ export default function SettingsPage() {
                               transform: `scale(${(settings.hero.imageSettings?.scale || 100) / 100})`,
                             }}
                           />
-                          
                         </div>
+                        {/* Color Overlay Preview */}
+                        {(settings.hero.imageSettings?.overlayColor && settings.hero.imageSettings?.overlayOpacity !== undefined) && (
+                          <div 
+                            className="absolute inset-0"
+                            style={colorOverlayStyle}
+                          />
+                        )}
                         <div className="relative h-full flex items-center justify-center text-white">
                           <div className="text-center p-8">
                             <h3 className="text-2xl font-bold">Preview</h3>
                             <p className="text-sm">Opacity: {settings.hero.imageSettings?.opacity}% | Position: {settings.hero.imageSettings?.position} | Scale: {settings.hero.imageSettings?.scale}%</p>
+                            {settings.hero.imageSettings?.overlayColor && (
+                              <p className="text-sm mt-1">Overlay: {settings.hero.imageSettings.overlayColor} at {settings.hero.imageSettings?.overlayOpacity ?? 50}%</p>
+                            )}
                           </div>
                         </div>
                         <button
@@ -687,6 +713,125 @@ export default function SettingsPage() {
                       Upload and customize the hero background image
                     </p>
                   </div>
+                  
+                  {/* Image Settings */}
+                  <div className="space-y-4 pt-4 border-t">
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <Label>Image Opacity</Label>
+                        <span className="text-sm text-gray-600">{settings.hero.imageSettings?.opacity || 30}%</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        step="5"
+                        value={settings.hero.imageSettings?.opacity || 30}
+                        onChange={(e) => setSettings({
+                          ...settings,
+                          hero: {
+                            ...settings.hero,
+                            imageSettings: {
+                              ...settings.hero.imageSettings,
+                              opacity: parseInt(e.target.value),
+                              position: settings.hero.imageSettings?.position || 'center',
+                              scale: settings.hero.imageSettings?.scale || 100,
+                              overlayColor: settings.hero.imageSettings?.overlayColor || '#1e40af',
+                              overlayOpacity: settings.hero.imageSettings?.overlayOpacity ?? 50,
+                            }
+                          }
+                        })}
+                        className="w-full"
+                        aria-label="Image opacity control"
+                      />
+                      <p className="text-sm text-gray-500 mt-1">
+                        Control image transparency
+                      </p>
+                    </div>
+                    
+                    {/* Overlay Color */}
+                    <div>
+                      <Label>Overlay Color</Label>
+                      <div className="flex gap-4 items-center mt-2">
+                        <Input
+                          type="color"
+                          value={settings.hero.imageSettings?.overlayColor || '#1e40af'}
+                          onChange={(e) => setSettings({
+                            ...settings,
+                            hero: {
+                              ...settings.hero,
+                              imageSettings: {
+                                ...settings.hero.imageSettings,
+                                opacity: settings.hero.imageSettings?.opacity ?? 30,
+                                position: settings.hero.imageSettings?.position || 'center',
+                                scale: settings.hero.imageSettings?.scale ?? 100,
+                                overlayColor: e.target.value,
+                                overlayOpacity: settings.hero.imageSettings?.overlayOpacity ?? 50,
+                              }
+                            }
+                          })}
+                          className="w-20 h-10 cursor-pointer"
+                        />
+                        <Input
+                          type="text"
+                          value={settings.hero.imageSettings?.overlayColor || '#1e40af'}
+                          onChange={(e) => setSettings({
+                            ...settings,
+                            hero: {
+                              ...settings.hero,
+                              imageSettings: {
+                                ...settings.hero.imageSettings,
+                                opacity: settings.hero.imageSettings?.opacity ?? 30,
+                                position: settings.hero.imageSettings?.position || 'center',
+                                scale: settings.hero.imageSettings?.scale ?? 100,
+                                overlayColor: e.target.value,
+                                overlayOpacity: settings.hero.imageSettings?.overlayOpacity ?? 50,
+                              }
+                            }
+                          })}
+                          placeholder="#1e40af"
+                          className="flex-1"
+                        />
+                      </div>
+                      <p className="text-sm text-gray-500 mt-1">
+                        Color overlay applied on top of the background image
+                      </p>
+                    </div>
+                    
+                    {/* Overlay Opacity */}
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <Label>Overlay Opacity</Label>
+                        <span className="text-sm text-gray-600">{settings.hero.imageSettings?.overlayOpacity ?? 50}%</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        step="5"
+                        value={settings.hero.imageSettings?.overlayOpacity ?? 50}
+                        onChange={(e) => setSettings({
+                          ...settings,
+                          hero: {
+                            ...settings.hero,
+                            imageSettings: {
+                              ...settings.hero.imageSettings,
+                              opacity: settings.hero.imageSettings?.opacity ?? 30,
+                              position: settings.hero.imageSettings?.position || 'center',
+                              scale: settings.hero.imageSettings?.scale ?? 100,
+                              overlayColor: settings.hero.imageSettings?.overlayColor || '#1e40af',
+                              overlayOpacity: parseInt(e.target.value),
+                            }
+                          }
+                        })}
+                        className="w-full"
+                        aria-label="Overlay opacity control"
+                      />
+                      <p className="text-sm text-gray-500 mt-1">
+                        Control overlay color intensity (0% = transparent, 100% = solid)
+                      </p>
+                    </div>
+                  </div>
                 </div>
               )}
 
@@ -704,10 +849,21 @@ export default function SettingsPage() {
                           loop
                           muted
                           playsInline
+                          style={{ opacity: (settings.hero.imageSettings?.opacity || 30) / 100 }}
                         />
-                        <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                        {/* Color Overlay Preview */}
+                        {(settings.hero.imageSettings?.overlayColor && settings.hero.imageSettings?.overlayOpacity !== undefined) && (
+                          <div 
+                            className="absolute inset-0"
+                            style={colorOverlayStyle}
+                          />
+                        )}
+                        <div className="relative flex items-center justify-center h-full">
                           <div className="text-white text-center">
                             <p className="text-sm">Video Preview (Opacity: {settings.hero.imageSettings?.opacity || 30}%)</p>
+                            {settings.hero.imageSettings?.overlayColor && (
+                              <p className="text-sm mt-1">Overlay: {settings.hero.imageSettings.overlayColor} at {settings.hero.imageSettings?.overlayOpacity ?? 50}%</p>
+                            )}
                           </div>
                         </div>
                         <button
@@ -775,6 +931,89 @@ export default function SettingsPage() {
                         Control video transparency (lower = more visible text)
                       </p>
                     </div>
+                    
+                    {/* Overlay Color */}
+                    <div>
+                      <Label>Overlay Color</Label>
+                      <div className="flex gap-4 items-center mt-2">
+                        <Input
+                          type="color"
+                          value={settings.hero.imageSettings?.overlayColor || '#1e40af'}
+                          onChange={(e) => setSettings({
+                            ...settings,
+                            hero: {
+                              ...settings.hero,
+                              imageSettings: {
+                                ...settings.hero.imageSettings,
+                                opacity: settings.hero.imageSettings?.opacity ?? 30,
+                                position: settings.hero.imageSettings?.position || 'center',
+                                scale: settings.hero.imageSettings?.scale ?? 100,
+                                overlayColor: e.target.value,
+                                overlayOpacity: settings.hero.imageSettings?.overlayOpacity ?? 50,
+                              }
+                            }
+                          })}
+                          className="w-20 h-10 cursor-pointer"
+                        />
+                        <Input
+                          type="text"
+                          value={settings.hero.imageSettings?.overlayColor || '#1e40af'}
+                          onChange={(e) => setSettings({
+                            ...settings,
+                            hero: {
+                              ...settings.hero,
+                              imageSettings: {
+                                ...settings.hero.imageSettings,
+                                opacity: settings.hero.imageSettings?.opacity ?? 30,
+                                position: settings.hero.imageSettings?.position || 'center',
+                                scale: settings.hero.imageSettings?.scale ?? 100,
+                                overlayColor: e.target.value,
+                                overlayOpacity: settings.hero.imageSettings?.overlayOpacity ?? 50,
+                              }
+                            }
+                          })}
+                          placeholder="#1e40af"
+                          className="flex-1"
+                        />
+                      </div>
+                      <p className="text-sm text-gray-500 mt-1">
+                        Color overlay applied on top of the background video
+                      </p>
+                    </div>
+                    
+                    {/* Overlay Opacity */}
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <Label>Overlay Opacity</Label>
+                        <span className="text-sm text-gray-600">{settings.hero.imageSettings?.overlayOpacity ?? 50}%</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        step="5"
+                        value={settings.hero.imageSettings?.overlayOpacity ?? 50}
+                        onChange={(e) => setSettings({
+                          ...settings,
+                          hero: {
+                            ...settings.hero,
+                            imageSettings: {
+                              ...settings.hero.imageSettings,
+                              opacity: settings.hero.imageSettings?.opacity ?? 30,
+                              position: settings.hero.imageSettings?.position || 'center',
+                              scale: settings.hero.imageSettings?.scale ?? 100,
+                              overlayColor: settings.hero.imageSettings?.overlayColor || '#1e40af',
+                              overlayOpacity: parseInt(e.target.value),
+                            }
+                          }
+                        })}
+                        className="w-full"
+                        aria-label="Overlay opacity control"
+                      />
+                      <p className="text-sm text-gray-500 mt-1">
+                        Control overlay color intensity (0% = transparent, 100% = solid)
+                      </p>
+                    </div>
                   </div>
                 </div>
               )}
@@ -783,8 +1022,9 @@ export default function SettingsPage() {
           </div>
 
           {/* Homepage Settings */}
-          <div className="bg-white p-6 rounded-lg border">
+          <div className="bg-white p-6 rounded-lg border space-y-6">
             <h2 className="text-xl font-semibold mb-4">Homepage Settings</h2>
+            
             <div>
               <Label htmlFor="featuredProjectsLimit">
                 Number of Featured Projects to Display
@@ -803,6 +1043,50 @@ export default function SettingsPage() {
               <p className="text-sm text-gray-500 mt-1">
                 How many featured projects to show in the carousel (1-12)
               </p>
+            </div>
+
+            {/* Customers Section Settings */}
+            <div className="pt-6 border-t">
+              <h3 className="text-lg font-semibold mb-4">Customers Section</h3>
+              
+              <div className="mb-4">
+                <Label htmlFor="customersHeading">Section Heading</Label>
+                <Input
+                  id="customersHeading"
+                  value={settings.customers.heading}
+                  onChange={(e) => setSettings({
+                    ...settings,
+                    customers: {
+                      ...settings.customers,
+                      heading: e.target.value
+                    }
+                  })}
+                  placeholder="Our Customers"
+                />
+                <p className="text-sm text-gray-500 mt-1">
+                  Heading displayed above the customers section
+                </p>
+              </div>
+
+              <div>
+                <Label htmlFor="customersDescription">Section Description</Label>
+                <Textarea
+                  id="customersDescription"
+                  value={settings.customers.description}
+                  onChange={(e) => setSettings({
+                    ...settings,
+                    customers: {
+                      ...settings.customers,
+                      description: e.target.value
+                    }
+                  })}
+                  rows={2}
+                  placeholder="Trusted by leading companies in renewable energy"
+                />
+                <p className="text-sm text-gray-500 mt-1">
+                  Description text displayed below the heading
+                </p>
+              </div>
             </div>
           </div>
         </div>

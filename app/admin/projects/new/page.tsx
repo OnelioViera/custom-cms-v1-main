@@ -30,6 +30,10 @@ export default function NewProjectPage() {
     content: '',
     images: [] as string[],
     backgroundImage: '',
+    overlayColor: '#1e40af',
+    overlayOpacity: 50,
+    titleColor: '#ffffff',
+    descriptionColor: '#ffffff',
   });
 
   const generateSlug = (title: string) => {
@@ -401,6 +405,112 @@ export default function NewProjectPage() {
                   </Button>
                   <p className="text-sm text-gray-500 mt-1">
                     Optional: Custom background for featured carousel (Max 5MB)
+                  </p>
+                </div>
+              </div>
+              
+              {/* Overlay Settings */}
+              <div className="space-y-4 pt-4 border-t">
+                <h3 className="font-semibold text-lg">Image Overlay</h3>
+                <p className="text-sm text-gray-600">
+                  Customize the color overlay applied on top of project images
+                </p>
+                
+                {/* Overlay Color */}
+                <div>
+                  <Label>Overlay Color</Label>
+                  <div className="flex gap-4 items-center mt-2">
+                    <Input
+                      type="color"
+                      value={formData.overlayColor}
+                      onChange={(e) => setFormData({ ...formData, overlayColor: e.target.value })}
+                      className="w-20 h-10 cursor-pointer"
+                    />
+                    <Input
+                      type="text"
+                      value={formData.overlayColor}
+                      onChange={(e) => setFormData({ ...formData, overlayColor: e.target.value })}
+                      placeholder="#1e40af"
+                      className="flex-1"
+                    />
+                  </div>
+                  <p className="text-sm text-gray-500 mt-1">
+                    Color overlay applied on top of project images
+                  </p>
+                </div>
+                
+                {/* Overlay Opacity */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <Label>Overlay Opacity</Label>
+                    <span className="text-sm text-gray-600">{formData.overlayOpacity}%</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    step="5"
+                    value={formData.overlayOpacity}
+                    onChange={(e) => setFormData({ ...formData, overlayOpacity: parseInt(e.target.value) })}
+                    className="w-full"
+                    aria-label="Overlay opacity control"
+                  />
+                  <p className="text-sm text-gray-500 mt-1">
+                    Control overlay color intensity (0% = transparent, 100% = solid)
+                  </p>
+                </div>
+              </div>
+              
+              {/* Text Color Settings */}
+              <div className="space-y-4 pt-4 border-t">
+                <h3 className="font-semibold text-lg">Text Colors</h3>
+                <p className="text-sm text-gray-600">
+                  Customize the font colors for project title and description
+                </p>
+                
+                {/* Title Color */}
+                <div>
+                  <Label>Title Color</Label>
+                  <div className="flex gap-4 items-center mt-2">
+                    <input
+                      type="color"
+                      value={formData.titleColor}
+                      onChange={(e) => setFormData({ ...formData, titleColor: e.target.value })}
+                      className="w-20 h-10 cursor-pointer rounded border border-gray-300"
+                    />
+                    <Input
+                      type="text"
+                      value={formData.titleColor}
+                      onChange={(e) => setFormData({ ...formData, titleColor: e.target.value })}
+                      placeholder="#ffffff"
+                      className="flex-1"
+                    />
+                  </div>
+                  <p className="text-sm text-gray-500 mt-1">
+                    Font color for the project title
+                  </p>
+                </div>
+                
+                {/* Description Color */}
+                <div>
+                  <Label>Description Color</Label>
+                  <div className="flex gap-4 items-center mt-2">
+                    <input
+                      type="color"
+                      value={formData.descriptionColor}
+                      onChange={(e) => setFormData({ ...formData, descriptionColor: e.target.value })}
+                      className="w-20 h-10 cursor-pointer rounded border border-gray-300"
+                    />
+                    <Input
+                      type="text"
+                      value={formData.descriptionColor}
+                      onChange={(e) => setFormData({ ...formData, descriptionColor: e.target.value })}
+                      placeholder="#ffffff"
+                      className="flex-1"
+                    />
+                  </div>
+                  <p className="text-sm text-gray-500 mt-1">
+                    Font color for the project description
                   </p>
                 </div>
               </div>

@@ -58,7 +58,7 @@ export default async function ProjectsPage() {
                 >
                   <div className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-lg transition-all">
                     {project.images && project.images[0] ? (
-                      <div className="aspect-video relative bg-gradient-to-br from-blue-500 to-blue-700">
+                      <div className="aspect-video relative" style={{ backgroundColor: project.overlayColor || '#1e40af' }}>
                         <Image
                           src={project.images[0]}
                           alt={project.title}
@@ -68,9 +68,19 @@ export default async function ProjectsPage() {
                           placeholder="blur"
                           blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgZmlsbD0iI2U1ZTdlYiIvPgo8L3N2Zz4="
                         />
+                        {/* Color Overlay */}
+                        {(project.overlayColor || project.overlayOpacity !== undefined) && (
+                          <div 
+                            className="absolute inset-0"
+                            style={{
+                              backgroundColor: project.overlayColor || '#1e40af',
+                              opacity: (project.overlayOpacity ?? 50) / 100,
+                            }}
+                          />
+                        )}
                       </div>
                     ) : (
-                      <div className="aspect-video bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center">
+                      <div className="aspect-video flex items-center justify-center" style={{ backgroundColor: project.overlayColor || '#1e40af' }}>
                         <span className="text-white text-lg font-semibold">
                           {project.title}
                         </span>

@@ -68,6 +68,13 @@ export default function CommandPalette({ open, onClose }: CommandPaletteProps) {
       keywords: ['services', 'offerings'],
     },
     {
+      id: 'customers',
+      label: 'Go to Customers',
+      icon: <Users className="w-4 h-4" />,
+      action: () => router.push('/admin/customers'),
+      keywords: ['customers', 'clients', 'logos'],
+    },
+    {
       id: 'settings',
       label: 'Go to Settings',
       icon: <Settings className="w-4 h-4" />,
@@ -94,6 +101,13 @@ export default function CommandPalette({ open, onClose }: CommandPaletteProps) {
       icon: <Users className="w-4 h-4" />,
       action: () => router.push('/admin/team/new'),
       keywords: ['new', 'add', 'team', 'member'],
+    },
+    {
+      id: 'new-customer',
+      label: 'Add New Customer',
+      icon: <Users className="w-4 h-4" />,
+      action: () => router.push('/admin/customers/new'),
+      keywords: ['new', 'add', 'customer', 'client', 'logo'],
     },
     {
       id: 'new-service',

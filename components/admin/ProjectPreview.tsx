@@ -11,6 +11,10 @@ interface ProjectPreviewProps {
     client?: string;
     images?: string[];
     backgroundImage?: string;
+    overlayColor?: string;
+    overlayOpacity?: number;
+    titleColor?: string;
+    descriptionColor?: string;
     status: string;
     featured: boolean;
   };
@@ -45,16 +49,26 @@ export default function ProjectPreview({ project }: ProjectPreviewProps) {
           <div className="bg-white rounded-lg border overflow-hidden hover:shadow-md transition-shadow">
             {/* Image */}
             {displayImage ? (
-              <div className="relative aspect-video bg-gray-100">
+              <div className="relative aspect-video" style={{ backgroundColor: project.overlayColor || '#1e40af' }}>
                 <Image
                   src={displayImage}
                   alt={project.title}
                   fill
                   className="object-cover"
                 />
+                {/* Color Overlay */}
+                {(project.overlayColor || project.overlayOpacity !== undefined) && (
+                  <div 
+                    className="absolute inset-0"
+                    style={{
+                      backgroundColor: project.overlayColor || '#1e40af',
+                      opacity: (project.overlayOpacity ?? 50) / 100,
+                    }}
+                  />
+                )}
               </div>
             ) : (
-              <div className="aspect-video bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center">
+              <div className="aspect-video flex items-center justify-center" style={{ backgroundColor: project.overlayColor || '#1e40af' }}>
                 <span className="text-white text-lg font-semibold">
                   {project.title.substring(0, 2).toUpperCase() || 'No Image'}
                 </span>
@@ -64,7 +78,10 @@ export default function ProjectPreview({ project }: ProjectPreviewProps) {
             {/* Content */}
             <div className="p-4">
               <div className="flex items-start justify-between gap-2 mb-2">
-                <h3 className="text-lg font-semibold text-gray-900 line-clamp-1">
+                <h3 
+                  className="text-lg font-semibold line-clamp-1"
+                  style={{ color: project.titleColor || '#111827' }}
+                >
                   {project.title || 'Project Title'}
                 </h3>
                 {project.featured && (
@@ -78,7 +95,10 @@ export default function ProjectPreview({ project }: ProjectPreviewProps) {
                 </p>
               )}
               
-              <p className="text-sm text-gray-600 line-clamp-2">
+              <p 
+                className="text-sm line-clamp-2"
+                style={{ color: project.descriptionColor || '#4b5563' }}
+              >
                 {project.description || 'Add a description to see it here...'}
               </p>
               
