@@ -137,21 +137,23 @@ export default async function HomePage() {
     <main>
       {/* Hero Section - With Video Support */}
       <section 
-        className="relative text-white overflow-hidden min-h-[600px] md:min-h-[700px] flex items-center"
+        className="relative text-white overflow-hidden min-h-screen flex items-center"
         style={{ backgroundColor: hero.backgroundColor || '#1e40af' }}
       >
         {/* Background Video */}
         {hero.backgroundType === 'video' && hero.backgroundVideo && (
           <>
-            <div className="absolute inset-0">
+            <div className="absolute inset-0 w-full h-full">
               <video
                 src={hero.backgroundVideo}
-                className="w-full h-full object-cover"
+                className="absolute inset-0 w-full h-full object-cover"
                 autoPlay
                 loop
                 muted
                 playsInline
-                style={{ opacity: (hero.imageSettings?.opacity || 30) / 100 }}
+                style={{ 
+                  opacity: (hero.imageSettings?.opacity || 30) / 100,
+                }}
               />
             </div>
             {/* Color Overlay */}
@@ -171,8 +173,7 @@ export default async function HomePage() {
         {hero.backgroundType === 'image' && hero.backgroundImage && (
           <>
             <div 
-              className="absolute inset-0"
-              style={{ opacity: (hero.imageSettings?.opacity || 30) / 100 }}
+              className="absolute inset-0 w-full h-full"
             >
               <Image
                 src={hero.backgroundImage}
@@ -184,9 +185,11 @@ export default async function HomePage() {
                   'object-center'
                 }`}
                 style={{
+                  opacity: (hero.imageSettings?.opacity || 30) / 100,
                   transform: `scale(${(hero.imageSettings?.scale || 100) / 100})`,
                 }}
                 priority
+                sizes="100vw"
               />
             </div>
             {/* Color Overlay */}
@@ -203,12 +206,12 @@ export default async function HomePage() {
         )}
         
         {/* Content */}
-        <div className="relative w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32">
+        <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 lg:py-32">
           <div className="max-w-3xl">
-            <h1 className="text-5xl md:text-6xl font-bold mb-6">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-4 md:mb-6 leading-tight">
               {hero.title}
             </h1>
-            <p className="text-xl md:text-2xl mb-8" style={{ color: 'rgba(255, 255, 255, 0.9)' }}>
+            <p className="text-lg sm:text-xl md:text-2xl mb-6 md:mb-8 leading-relaxed" style={{ color: 'rgba(255, 255, 255, 0.9)' }}>
               {hero.subtitle}
             </p>
             
