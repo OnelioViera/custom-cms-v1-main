@@ -136,8 +136,11 @@ export default function SettingsPage() {
           { value: '/contact', label: 'Contact' },
         ];
         
+        // Standard page slugs to avoid duplicates
+        const standardSlugs = new Set(['', 'about', 'services', 'projects', 'team', 'contact']);
+        
         const customPages = (data.pages || [])
-          .filter((page: any) => page.status === 'published')
+          .filter((page: any) => page.status === 'published' && !standardSlugs.has(page.slug))
           .map((page: any) => ({
             value: `/${page.slug}`,
             label: page.title
