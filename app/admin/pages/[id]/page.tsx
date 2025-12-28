@@ -21,6 +21,7 @@ import RichTextEditor from '@/components/admin/RichTextEditor';
 import PageBuilder from '@/components/admin/PageBuilder';
 import { PageBlock } from '@/lib/models/Content';
 import { Switch } from '@/components/ui/switch';
+import PagePreview from '@/components/admin/PagePreview';
 
 export default function EditPagePage() {
   const router = useRouter();
@@ -184,20 +185,54 @@ export default function EditPagePage() {
 
   return (
     <div>
-      <div className="mb-8">
-        <Button
-          variant="ghost"
-          onClick={() => router.push('/admin/pages')}
-          className="mb-4"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Pages
-        </Button>
-        <h1 className="text-3xl font-bold">Edit Page</h1>
+      {/* Top Action Bar */}
+      <div className="bg-white border-b sticky top-0 z-10 mb-6">
+        <div className="flex items-center justify-between px-6 py-4">
+          <div className="flex items-center gap-4">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => router.push('/admin/pages')}
+            >
+              <ArrowLeft className="w-4 h-4" />
+            </Button>
+            <div>
+              <h1 className="text-2xl font-bold">Edit Page</h1>
+              <p className="text-sm text-gray-600">{formData.title || 'Untitled Page'}</p>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex items-center gap-3">
+            <Link href={`/preview/page/${params.id}`} target="_blank">
+              <Button type="button" variant="outline">
+                <Eye className="w-4 h-4 mr-2" />
+                Preview
+              </Button>
+            </Link>
+            <Button
+              onClick={(e) => {
+                e.preventDefault();
+                const form = document.querySelector('form');
+                if (form) {
+                  form.requestSubmit();
+                }
+              }}
+              disabled={saving}
+            >
+              <Save className="w-4 h-4 mr-2" />
+              {saving ? 'Saving...' : 'Save Changes'}
+            </Button>
+          </div>
+        </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="max-w-3xl">
-        <div className="bg-white rounded-lg border p-6 space-y-6">
+      {/* Two Column Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left Column - Form */}
+        <div className="lg:col-span-2 space-y-6">
+          <form onSubmit={handleSubmit}>
+            <div className="bg-white rounded-lg border p-6 space-y-6">
           {/* Title */}
           <div className="space-y-2">
             <Label htmlFor="title">Title *</Label>
@@ -332,29 +367,15 @@ export default function EditPagePage() {
             </Select>
           </div>
 
-          {/* Actions */}
-          <div className="flex items-center gap-4 pt-6 border-t">
-            <Button type="submit" disabled={saving}>
-              <Save className="w-4 h-4 mr-2" />
-              {saving ? 'Saving...' : 'Save Changes'}
-              <span className="ml-2 text-xs opacity-60">Ctrl+S</span>
-            </Button>
-            <Link href={`/preview/page/${params.id}`} target="_blank">
-              <Button type="button" variant="outline">
-                <Eye className="w-4 h-4 mr-2" />
-                Preview
-              </Button>
-            </Link>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => router.push('/admin/pages')}
-            >
-              Cancel
-            </Button>
-          </div>
+            </div>
+          </form>
         </div>
-      </form>
+
+        {/* Right Column - Live Preview */}
+        <div className="lg:col-span-1">
+          <PagePreview page={formData} />
+        </div>
+      </div>
     </div>
   );
 }
