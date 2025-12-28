@@ -11,9 +11,21 @@ export interface Page {
   metaTitle?: string;
   metaDescription?: string;
   status: 'draft' | 'published';
+  showInNavbar?: boolean;
+  navbarOrder?: number;
+  openInNewTab?: boolean;
+  blocks?: PageBlock[]; // For page builder blocks
   createdAt: Date;
   updatedAt: Date;
   createdBy: string;
+}
+
+// Page Block Model (for page builder)
+export interface PageBlock {
+  id: string;
+  type: 'text' | 'image' | 'card' | 'hero' | 'columns' | 'cta';
+  content: any; // Flexible content based on block type
+  order: number;
 }
 
 // Project Model

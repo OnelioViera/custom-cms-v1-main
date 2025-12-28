@@ -18,6 +18,9 @@ import {
 } from '@/components/ui/select';
 import { ArrowLeft, Save, Eye } from 'lucide-react';
 import RichTextEditor from '@/components/admin/RichTextEditor';
+import PageBuilder from '@/components/admin/PageBuilder';
+import { PageBlock } from '@/lib/models/Content';
+import { Switch } from '@/components/ui/switch';
 
 export default function EditPagePage() {
   const router = useRouter();
@@ -31,6 +34,10 @@ export default function EditPagePage() {
     metaTitle: '',
     metaDescription: '',
     status: 'draft' as 'draft' | 'published',
+    showInNavbar: false,
+    navbarOrder: 0,
+    openInNewTab: false,
+    blocks: [] as PageBlock[],
   });
 
   useEffect(() => {
@@ -39,8 +46,28 @@ export default function EditPagePage() {
 
   const fetchPage = async () => {
     try {
+      // Check if we have a valid ID
+      if (!params.id || params.id === 'undefined') {
+        toast.error('Invalid page ID. Redirecting to create new page...');
+        router.push('/admin/pages/new');
+        return;
+      }
+
       const response = await fetch(`/api/pages/${params.id}`);
+      
+      // Check if response is JSON
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        const text = await response.text();
+        console.error('Non-JSON response:', text);
+        toast.error('Failed to load page: Invalid response format');
+        setFetching(false);
+        router.push('/admin/pages');
+        return;
+      }
+
       const data = await response.json();
+      
       if (data.success) {
         setFormData({
           title: data.page.title,
@@ -49,10 +76,19 @@ export default function EditPagePage() {
           metaTitle: data.page.metaTitle || '',
           metaDescription: data.page.metaDescription || '',
           status: data.page.status,
+          showInNavbar: data.page.showInNavbar || false,
+          navbarOrder: data.page.navbarOrder || 0,
+          openInNewTab: data.page.openInNewTab || false,
+          blocks: data.page.blocks || [],
         });
+      } else {
+        toast.error(data.message || 'Failed to load page');
+        router.push('/admin/pages');
       }
     } catch (error) {
       console.error('Error fetching page:', error);
+      toast.error('Failed to load page');
+      router.push('/admin/pages');
     } finally {
       setFetching(false);
     }
@@ -60,8 +96,15 @@ export default function EditPagePage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSaving(true);
     
+    // Check if we have a valid ID
+    if (!params.id || params.id === 'undefined') {
+      toast.error('Invalid page ID. Please create a new page from the pages list.');
+      router.push('/admin/pages/new');
+      return;
+    }
+    
+    setSaving(true);
     const toastId = toast.loading('Saving page...');
 
     try {
@@ -70,6 +113,17 @@ export default function EditPagePage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
+
+      // Check if response is JSON
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        const text = await response.text();
+        console.error('Non-JSON response:', text);
+        toast.error('Server error: Invalid response format', {
+          id: toastId,
+        });
+        return;
+      }
 
       const data = await response.json();
 
@@ -176,6 +230,60 @@ export default function EditPagePage() {
               value={formData.content}
               onChange={(content) => setFormData({ ...formData, content })}
             />
+          </div>
+
+          {/* Page Builder */}
+          <div className="border-t pt-6">
+            <PageBuilder
+              blocks={formData.blocks}
+              onChange={(blocks) => setFormData({ ...formData, blocks })}
+            />
+          </div>
+
+          {/* Navbar Settings */}
+          <div className="border-t pt-6 space-y-4">
+            <h3 className="font-semibold">Navigation Settings</h3>
+            
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label htmlFor="showInNavbar">Show in Navbar</Label>
+                <p className="text-sm text-gray-500">Display this page in the main navigation menu</p>
+              </div>
+              <Switch
+                id="showInNavbar"
+                checked={formData.showInNavbar}
+                onCheckedChange={(checked) => setFormData({ ...formData, showInNavbar: checked })}
+              />
+            </div>
+
+            {formData.showInNavbar && (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="navbarOrder">Navbar Order</Label>
+                  <Input
+                    id="navbarOrder"
+                    type="number"
+                    min="0"
+                    value={formData.navbarOrder}
+                    onChange={(e) => setFormData({ ...formData, navbarOrder: parseInt(e.target.value) || 0 })}
+                    placeholder="0"
+                  />
+                  <p className="text-sm text-gray-500">Lower numbers appear first in the navbar</p>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label htmlFor="openInNewTab">Open in New Tab</Label>
+                    <p className="text-sm text-gray-500">Open this page link in a new browser tab</p>
+                  </div>
+                  <Switch
+                    id="openInNewTab"
+                    checked={formData.openInNewTab}
+                    onCheckedChange={(checked) => setFormData({ ...formData, openInNewTab: checked })}
+                  />
+                </div>
+              </>
+            )}
           </div>
 
           {/* SEO Section */}

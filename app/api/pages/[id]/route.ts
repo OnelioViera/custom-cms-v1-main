@@ -11,6 +11,15 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
+    
+    // Validate ObjectId format
+    if (!id || id === 'undefined' || !ObjectId.isValid(id)) {
+      return NextResponse.json({
+        success: false,
+        message: 'Invalid page ID'
+      }, { status: 400 });
+    }
+
     const db = await getDatabase();
     const pagesCollection = db.collection<Page>('pages');
     
@@ -34,7 +43,8 @@ export async function GET(
     console.error('Error fetching page:', error);
     return NextResponse.json({
       success: false,
-      message: 'Failed to fetch page'
+      message: 'Failed to fetch page',
+      error: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 });
   }
 }
@@ -46,19 +56,59 @@ export async function PUT(
 ) {
   try {
     const { id } = await params;
+    
+    // Validate ObjectId format
+    if (!id || id === 'undefined' || !ObjectId.isValid(id)) {
+      return NextResponse.json({
+        success: false,
+        message: 'Invalid page ID'
+      }, { status: 400 });
+    }
+
     const body = await request.json();
     const db = await getDatabase();
     const pagesCollection = db.collection<Page>('pages');
 
-    const updateData = {
+    // Check if slug is being changed and if it conflicts with another page
+    if (body.slug) {
+      const existingPage = await pagesCollection.findOne({ 
+        slug: body.slug,
+        _id: { $ne: new ObjectId(id) }
+      });
+      if (existingPage) {
+        return NextResponse.json({
+          success: false,
+          message: 'A page with this slug already exists'
+        }, { status: 400 });
+      }
+    }
+
+    // Get max navbar order if needed
+    const maxNavbarOrder = await pagesCollection
+      .findOne({}, { sort: { navbarOrder: -1 } });
+    const nextNavbarOrder = maxNavbarOrder?.navbarOrder !== undefined 
+      ? (maxNavbarOrder.navbarOrder || 0) + 1 
+      : 0;
+
+    const updateData: any = {
       title: body.title,
       slug: body.slug,
       content: body.content,
       metaTitle: body.metaTitle,
       metaDescription: body.metaDescription,
       status: body.status,
+      showInNavbar: body.showInNavbar || false,
+      openInNewTab: body.openInNewTab || false,
+      blocks: body.blocks || [],
       updatedAt: new Date()
     };
+
+    // Handle navbar order
+    if (body.showInNavbar) {
+      updateData.navbarOrder = body.navbarOrder ?? nextNavbarOrder;
+    } else {
+      updateData.navbarOrder = undefined;
+    }
 
     const result = await pagesCollection.updateOne(
       { _id: new ObjectId(id) },
@@ -84,7 +134,8 @@ export async function PUT(
     console.error('Error updating page:', error);
     return NextResponse.json({
       success: false,
-      message: 'Failed to update page'
+      message: 'Failed to update page',
+      error: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 });
   }
 }
@@ -96,6 +147,15 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
+    
+    // Validate ObjectId format
+    if (!id || id === 'undefined' || !ObjectId.isValid(id)) {
+      return NextResponse.json({
+        success: false,
+        message: 'Invalid page ID'
+      }, { status: 400 });
+    }
+
     const db = await getDatabase();
     const pagesCollection = db.collection<Page>('pages');
 
@@ -120,7 +180,8 @@ export async function DELETE(
     console.error('Error deleting page:', error);
     return NextResponse.json({
       success: false,
-      message: 'Failed to delete page'
+      message: 'Failed to delete page',
+      error: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 });
   }
 }

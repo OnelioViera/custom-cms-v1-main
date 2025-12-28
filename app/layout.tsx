@@ -4,8 +4,7 @@ import "./globals.css";
 import { Toaster } from 'sonner';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import { headers } from 'next/headers';
-import Header from '@/components/public/Header';
-import Footer from '@/components/public/Footer';
+import LayoutWrapper from '@/components/layout/LayoutWrapper';
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -41,22 +40,15 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const headersList = await headers();
-  const pathname = headersList.get('x-pathname') || '';
-  
-  // Don't show header/footer on admin routes
-  const isAdminRoute = pathname.startsWith('/admin');
-  const isPreviewRoute = pathname.startsWith('/preview');
-  const shouldShowLayout = !isAdminRoute && !isPreviewRoute;
-
+  // Always apply base body class - LayoutWrapper will handle conditional layout on client
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body className={`${inter.className} min-h-screen flex flex-col`}>
         <Toaster position="top-right" />
         <ErrorBoundary>
-          {shouldShowLayout && <Header />}
-          {children}
-          {shouldShowLayout && <Footer />}
+          <LayoutWrapper>
+            {children}
+          </LayoutWrapper>
         </ErrorBoundary>
       </body>
     </html>

@@ -6,10 +6,18 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Menu, X } from 'lucide-react';
 
+interface NavPage {
+  title: string;
+  slug: string;
+  openInNewTab: boolean;
+  navbarOrder: number;
+}
+
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [logoError, setLogoError] = useState(false);
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  const [navPages, setNavPages] = useState<NavPage[]>([]);
 
   useEffect(() => {
     // Fetch logo from settings
@@ -23,6 +31,18 @@ export default function Header() {
       .catch(() => {
         // If settings fetch fails, try static file
         setLogoUrl('/logo.png');
+      });
+
+    // Fetch pages for navbar
+    fetch('/api/pages/navbar')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.pages) {
+          setNavPages(data.pages);
+        }
+      })
+      .catch(err => {
+        console.error('Error fetching navbar pages:', err);
       });
   }, []);
 
@@ -39,12 +59,30 @@ export default function Header() {
     };
   }, [mobileMenuOpen]);
 
+  // Standard navigation items (always shown)
+  const standardNav = [
+    { name: 'Home', href: '/', openInNewTab: false, isStandard: true },
+    { name: 'About', href: '/about', openInNewTab: false, isStandard: true },
+    { name: 'Services', href: '/services', openInNewTab: false, isStandard: true },
+    { name: 'Projects', href: '/projects', openInNewTab: false, isStandard: true },
+    { name: 'Team', href: '/team', openInNewTab: false, isStandard: true },
+  ];
+
+  // Get hrefs of dynamic pages to avoid duplicates
+  const dynamicHrefs = new Set(navPages.map(page => `/${page.slug}`));
+  
+  // Filter out standard nav items that have a dynamic page with the same href
+  const filteredStandardNav = standardNav.filter(item => !dynamicHrefs.has(item.href));
+
+  // Combine filtered standard nav with dynamic pages
   const navigation = [
-    { name: 'Home', href: '/' },
-    { name: 'About', href: '/about' },
-    { name: 'Services', href: '/services' },
-    { name: 'Projects', href: '/projects' },
-    { name: 'Team', href: '/team' },
+    ...filteredStandardNav,
+    ...navPages.map(page => ({
+      name: page.title,
+      href: `/${page.slug}`,
+      openInNewTab: page.openInNewTab,
+      isStandard: false,
+    })),
   ];
 
   return (
@@ -54,9 +92,9 @@ export default function Header() {
           {/* Logo */}
           <Link href="/" className="flex items-center">
             {logoError || !logoUrl ? (
-              <span className="text-2xl font-bold text-blue-900">
-                Lindsay Precast
-              </span>
+            <span className="text-2xl font-bold text-blue-900">
+              Lindsay Precast
+            </span>
             ) : (
               <Image
                 src={logoUrl}
@@ -72,10 +110,12 @@ export default function Header() {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
-            {navigation.map((item) => (
+            {navigation.map((item, index) => (
               <Link
-                key={item.name}
+                key={`${item.href}-${index}`}
                 href={item.href}
+                target={item.openInNewTab ? '_blank' : undefined}
+                rel={item.openInNewTab ? 'noopener noreferrer' : undefined}
                 className="text-gray-700 hover:text-blue-600 font-medium transition-colors"
               >
                 {item.name}
@@ -118,10 +158,12 @@ export default function Header() {
           {/* Slide-out Menu */}
           <div className="fixed top-16 right-0 bottom-0 w-64 bg-white shadow-xl z-50 md:hidden animate-in slide-in-from-right duration-300">
             <nav className="flex flex-col p-4 space-y-1">
-              {navigation.map((item) => (
+              {navigation.map((item, index) => (
                 <Link
-                  key={item.name}
+                  key={`${item.href}-${index}`}
                   href={item.href}
+                  target={item.openInNewTab ? '_blank' : undefined}
+                  rel={item.openInNewTab ? 'noopener noreferrer' : undefined}
                   onClick={() => setMobileMenuOpen(false)}
                   className="px-4 py-3 text-gray-700 hover:bg-gray-100 hover:text-blue-600 rounded-lg font-medium transition-colors"
                 >

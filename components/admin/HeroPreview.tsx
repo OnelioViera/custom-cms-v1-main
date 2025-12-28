@@ -65,17 +65,17 @@ export default function HeroPreview({ settings }: HeroPreviewProps) {
           {/* Background Video */}
           {hero.backgroundType === 'video' && hero.backgroundVideo && (
             <>
-              <div className="absolute inset-0">
-                <video
-                  src={hero.backgroundVideo}
-                  className="w-full h-full object-cover"
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
-                  style={{ opacity: (hero.imageSettings?.opacity || 30) / 100 }}
-                />
-              </div>
+            <div className="absolute inset-0">
+              <video
+                src={hero.backgroundVideo}
+                className="w-full h-full object-cover"
+                autoPlay
+                loop
+                muted
+                playsInline
+                style={{ opacity: (hero.imageSettings?.opacity || 30) / 100 }}
+              />
+            </div>
               {/* Color Overlay */}
               {(hero.imageSettings?.overlayColor && hero.imageSettings?.overlayOpacity !== undefined) && (
                 <div 
@@ -92,20 +92,20 @@ export default function HeroPreview({ settings }: HeroPreviewProps) {
           {/* Background Image */}
           {hero.backgroundType === 'image' && hero.backgroundImage && (
             <>
-              <div 
-                className="absolute inset-0"
-                style={{ opacity: (hero.imageSettings?.opacity || 30) / 100 }}
-              >
-                <Image
-                  src={hero.backgroundImage}
-                  alt="Hero background"
-                  fill
-                  className={`object-cover ${getObjectPosition()}`}
-                  style={{
-                    transform: `scale(${(hero.imageSettings?.scale || 100) / 100})`,
-                  }}
-                />
-              </div>
+            <div 
+              className="absolute inset-0"
+              style={{ opacity: (hero.imageSettings?.opacity || 30) / 100 }}
+            >
+              <Image
+                src={hero.backgroundImage}
+                alt="Hero background"
+                fill
+                className={`object-cover ${getObjectPosition()}`}
+                style={{
+                  transform: `scale(${(hero.imageSettings?.scale || 100) / 100})`,
+                }}
+              />
+            </div>
               {/* Color Overlay */}
               {(hero.imageSettings?.overlayColor && hero.imageSettings?.overlayOpacity !== undefined) && (
                 <div 

@@ -22,7 +22,7 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [showImageEditor, setShowImageEditor] = useState(false);
-  const [availablePages, setAvailablePages] = useState<Page[]>([]);
+  const [availablePages, setAvailablePages] = useState<Array<{ value: string; label: string }>>([]);
   const [settings, setSettings] = useState({
     logo: '',
     featuredProjectsLimit: 3,
@@ -125,7 +125,25 @@ export default function SettingsPage() {
       const data = await response.json();
       
       if (data.success) {
-        setAvailablePages(data.pages);
+        // Transform pages to have value/label format for dropdowns
+        // Also include standard site pages
+        const standardPages = [
+          { value: '/', label: 'Home' },
+          { value: '/about', label: 'About' },
+          { value: '/services', label: 'Services' },
+          { value: '/projects', label: 'Projects' },
+          { value: '/team', label: 'Team' },
+          { value: '/contact', label: 'Contact' },
+        ];
+        
+        const customPages = (data.pages || [])
+          .filter((page: any) => page.status === 'published')
+          .map((page: any) => ({
+            value: `/${page.slug}`,
+            label: page.title
+          }));
+        
+        setAvailablePages([...standardPages, ...customPages]);
       }
     } catch (error) {
       console.error('Error fetching pages:', error);

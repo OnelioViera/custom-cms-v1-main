@@ -46,7 +46,7 @@ export async function GET(
           new NextResponse(buffer, {
             headers: {
               'Content-Type': contentType,
-              'Cache-Control': 'public, max-age=31536000, immutable',
+              'Cache-Control': 'public, max-age=3600, must-revalidate', // Cache for 1 hour but allow revalidation
             },
           })
         );

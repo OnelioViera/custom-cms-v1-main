@@ -1,5 +1,8 @@
 import { getDatabase } from '@/lib/mongodb';
 import { Page } from '@/lib/models/Content';
+import PageBlockRenderer from '@/components/public/PageBlockRenderer';
+import { generateMetadata as generateMeta } from '@/lib/seo';
+import type { Metadata } from 'next';
 
 async function getAboutPage() {
   try {
@@ -21,6 +24,24 @@ async function getAboutPage() {
     console.error('Error fetching about page:', error);
     return null;
   }
+}
+
+export async function generateMetadata(): Promise<Metadata> {
+  const page = await getAboutPage();
+
+  if (!page) {
+    return {
+      title: 'About Us',
+    };
+  }
+
+  return generateMeta({
+    title: page.metaTitle || page.title,
+    description: page.metaDescription || page.content.substring(0, 155),
+    url: '/about',
+    type: 'article',
+    keywords: (page as { keywords?: string[] }).keywords || [],
+  });
 }
 
 export default async function AboutPage() {
@@ -51,25 +72,43 @@ export default async function AboutPage() {
     );
   }
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <section className="bg-blue-900 text-white py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-5xl font-bold">{page.title}</h1>
-        </div>
-      </section>
+  // JSON-LD structured data
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    name: page.title,
+    description: page.metaDescription || page.content.substring(0, 155),
+    url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/about`,
+  };
 
-      <section className="py-12">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-white rounded-lg shadow-sm p-8">
-            <div className="prose prose-lg max-w-none">
-              <div className="text-gray-700 leading-relaxed whitespace-pre-wrap">
-                {page.content}
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      {/* Render page blocks if available - no title banner */}
+      {page.blocks && page.blocks.length > 0 ? (
+        <PageBlockRenderer blocks={page.blocks} />
+      ) : (
+        <>
+          <section className="bg-blue-900 text-white py-16">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <h1 className="text-5xl font-bold">{page.title}</h1>
+            </div>
+          </section>
+          <section className="py-12">
+            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="bg-white rounded-lg shadow-sm p-8">
+                <div 
+                  className="prose prose-lg max-w-none"
+                  dangerouslySetInnerHTML={{ __html: page.content }}
+                />
               </div>
             </div>
-          </div>
-        </div>
-      </section>
-    </div>
+          </section>
+        </>
+      )}
+    </>
   );
 }

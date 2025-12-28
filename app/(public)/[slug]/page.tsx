@@ -3,6 +3,7 @@ import { generateMetadata as generateMeta } from '@/lib/seo';
 import type { Metadata } from 'next';
 import { getDatabase } from '@/lib/mongodb';
 import { Page } from '@/lib/models/Content';
+import PageBlockRenderer from '@/components/public/PageBlockRenderer';
 
 async function getPage(slug: string) {
   try {
@@ -76,22 +77,28 @@ export default async function DynamicPage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <section className="bg-blue-900 text-white py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-5xl font-bold">{page.title}</h1>
-        </div>
-      </section>
-
-      <section className="py-12">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-white rounded-lg shadow-sm p-8">
-            <div 
-              className="prose prose-lg max-w-none"
-              dangerouslySetInnerHTML={{ __html: page.content }}
-            />
-          </div>
-        </div>
-      </section>
+      {/* Render page blocks if available - no title banner */}
+      {page.blocks && page.blocks.length > 0 ? (
+        <PageBlockRenderer blocks={page.blocks} />
+      ) : (
+        <>
+          <section className="bg-blue-900 text-white py-16">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <h1 className="text-5xl font-bold">{page.title}</h1>
+            </div>
+          </section>
+          <section className="py-12">
+            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="bg-white rounded-lg shadow-sm p-8">
+                <div 
+                  className="prose prose-lg max-w-none"
+                  dangerouslySetInnerHTML={{ __html: page.content }}
+                />
+              </div>
+            </div>
+          </section>
+        </>
+      )}
     </>
   );
 }

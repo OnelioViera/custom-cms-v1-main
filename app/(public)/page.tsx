@@ -120,7 +120,7 @@ async function getHomeData() {
           scale: 100,
         },
       },
-      projects: [],
+      projects: [], 
       customers: [],
       customersSettings: {
         heading: 'Our Customers',
@@ -144,18 +144,18 @@ export default async function HomePage() {
         {hero.backgroundType === 'video' && hero.backgroundVideo && (
           <>
             <div className="absolute inset-0 w-full h-full">
-              <video
-                src={hero.backgroundVideo}
+            <video
+              src={hero.backgroundVideo}
                 className="absolute inset-0 w-full h-full object-cover"
-                autoPlay
-                loop
-                muted
-                playsInline
+              autoPlay
+              loop
+              muted
+              playsInline
                 style={{ 
                   opacity: (hero.imageSettings?.opacity || 30) / 100,
                 }}
-              />
-            </div>
+            />
+          </div>
             {/* Color Overlay */}
             {(hero.imageSettings?.overlayColor && hero.imageSettings?.overlayOpacity) && (
               <div 
@@ -172,26 +172,26 @@ export default async function HomePage() {
         {/* Background Image */}
         {hero.backgroundType === 'image' && hero.backgroundImage && (
           <>
-            <div 
+          <div 
               className="absolute inset-0 w-full h-full"
-            >
-              <Image
-                src={hero.backgroundImage}
-                alt="Hero background"
-                fill
-                className={`object-cover ${
-                  hero.imageSettings?.position === 'top' ? 'object-top' :
-                  hero.imageSettings?.position === 'bottom' ? 'object-bottom' :
-                  'object-center'
-                }`}
-                style={{
+          >
+            <Image
+              src={hero.backgroundImage}
+              alt="Hero background"
+              fill
+              className={`object-cover ${
+                hero.imageSettings?.position === 'top' ? 'object-top' :
+                hero.imageSettings?.position === 'bottom' ? 'object-bottom' :
+                'object-center'
+              }`}
+              style={{
                   opacity: (hero.imageSettings?.opacity || 30) / 100,
-                  transform: `scale(${(hero.imageSettings?.scale || 100) / 100})`,
-                }}
-                priority
+                transform: `scale(${(hero.imageSettings?.scale || 100) / 100})`,
+              }}
+              priority
                 sizes="100vw"
-              />
-            </div>
+            />
+          </div>
             {/* Color Overlay */}
             {(hero.imageSettings?.overlayColor && hero.imageSettings?.overlayOpacity !== undefined) && (
               <div 

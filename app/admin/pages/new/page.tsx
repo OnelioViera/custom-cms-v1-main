@@ -20,6 +20,9 @@ import {
 } from '@/components/ui/select';
 import { ArrowLeft, Save, AlertCircle } from 'lucide-react';
 import RichTextEditor from '@/components/admin/RichTextEditor';
+import PageBuilder from '@/components/admin/PageBuilder';
+import { PageBlock } from '@/lib/models/Content';
+import { Switch } from '@/components/ui/switch';
 
 export default function NewPagePage() {
   const router = useRouter();
@@ -31,6 +34,10 @@ export default function NewPagePage() {
     metaTitle: '',
     metaDescription: '',
     status: 'draft' as 'draft' | 'published',
+    showInNavbar: false,
+    navbarOrder: 0,
+    openInNewTab: false,
+    blocks: [] as PageBlock[],
   });
   const [errors, setErrors] = useState<ValidationErrors>({});
 
@@ -53,8 +60,8 @@ export default function NewPagePage() {
       },
     },
     content: {
-      required: true,
-      minLength: 10,
+      required: false,
+      minLength: 0,
     },
   };
 
@@ -105,6 +112,15 @@ export default function NewPagePage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
+
+      // Check if response is JSON
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        const text = await response.text();
+        console.error('Non-JSON response:', text);
+        toast.error('Server error: Invalid response format', { id: toastId });
+        return;
+      }
 
       const data = await response.json();
 
@@ -205,6 +221,60 @@ export default function NewPagePage() {
               <p className="text-sm text-red-600 flex items-center gap-1 mt-1">
                 {errors.content}
               </p>
+            )}
+          </div>
+
+          {/* Page Builder */}
+          <div className="border-t pt-6">
+            <PageBuilder
+              blocks={formData.blocks}
+              onChange={(blocks) => setFormData({ ...formData, blocks })}
+            />
+          </div>
+
+          {/* Navbar Settings */}
+          <div className="border-t pt-6 space-y-4">
+            <h2 className="text-lg font-semibold">Navigation Settings</h2>
+            
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label htmlFor="showInNavbar">Show in Navbar</Label>
+                <p className="text-sm text-gray-500">Display this page in the main navigation menu</p>
+              </div>
+              <Switch
+                id="showInNavbar"
+                checked={formData.showInNavbar}
+                onCheckedChange={(checked) => setFormData({ ...formData, showInNavbar: checked })}
+              />
+            </div>
+
+            {formData.showInNavbar && (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="navbarOrder">Navbar Order</Label>
+                  <Input
+                    id="navbarOrder"
+                    type="number"
+                    min="0"
+                    value={formData.navbarOrder}
+                    onChange={(e) => setFormData({ ...formData, navbarOrder: parseInt(e.target.value) || 0 })}
+                    placeholder="0"
+                  />
+                  <p className="text-sm text-gray-500">Lower numbers appear first in the navbar</p>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label htmlFor="openInNewTab">Open in New Tab</Label>
+                    <p className="text-sm text-gray-500">Open this page link in a new browser tab</p>
+                  </div>
+                  <Switch
+                    id="openInNewTab"
+                    checked={formData.openInNewTab}
+                    onCheckedChange={(checked) => setFormData({ ...formData, openInNewTab: checked })}
+                  />
+                </div>
+              </>
             )}
           </div>
 

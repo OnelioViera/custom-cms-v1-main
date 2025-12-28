@@ -1,10 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Upload, X, Image as ImageIcon } from 'lucide-react';
+import { Upload, X, Image as ImageIcon, Edit } from 'lucide-react';
 import { toast } from 'sonner';
 import ImageCropper from './ImageCropper';
 
@@ -13,17 +13,24 @@ interface ImageUploadProps {
   onChange: (url: string) => void;
   label?: string;
   aspectRatio?: number;
+  showEditButton?: boolean;
 }
 
 export default function ImageUpload({ 
   value, 
   onChange, 
   label = 'Image',
-  aspectRatio = 1 
+  aspectRatio = 1,
+  showEditButton = false
 }: ImageUploadProps) {
   const [uploading, setUploading] = useState(false);
   const [preview, setPreview] = useState(value || '');
   const [cropperImage, setCropperImage] = useState<string | null>(null);
+
+  // Sync preview with value prop when it changes
+  useEffect(() => {
+    setPreview(value || '');
+  }, [value]);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -72,6 +79,24 @@ export default function ImageUpload({
     onChange('');
   };
 
+  const handleEditImage = async () => {
+    if (!preview) return;
+    
+    try {
+      // Load the current image and open it in the cropper
+      const response = await fetch(preview);
+      const blob = await response.blob();
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setCropperImage(reader.result as string);
+      };
+      reader.readAsDataURL(blob);
+    } catch (error) {
+      console.error('Error loading image for editing:', error);
+      toast.error('Failed to load image for editing');
+    }
+  };
+
   return (
     <div className="space-y-2">
       <Label>{label}</Label>
@@ -104,15 +129,28 @@ export default function ImageUpload({
               />
             </div>
           </div>
-          <Button
-            type="button"
-            size="sm"
-            variant="destructive"
-            className="absolute top-2 right-2 z-10"
-            onClick={handleRemove}
-          >
-            <X className="w-4 h-4" />
-          </Button>
+          <div className="absolute top-2 right-2 z-10 flex gap-2">
+            {showEditButton && (
+              <Button
+                type="button"
+                size="sm"
+                variant="secondary"
+                className="bg-white hover:bg-gray-100"
+                onClick={handleEditImage}
+                disabled={uploading}
+              >
+                <Edit className="w-4 h-4" />
+              </Button>
+            )}
+            <Button
+              type="button"
+              size="sm"
+              variant="destructive"
+              onClick={handleRemove}
+            >
+              <X className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
       ) : (
         <div className="border-2 border-dashed rounded-lg p-8 text-center">
